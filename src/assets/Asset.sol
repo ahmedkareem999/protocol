@@ -1,11 +1,11 @@
 pragma solidity ^0.4.11;
 
-import '../dependencies/ERC20.sol';
+import 'ds-token/base.sol';
 import './AssetInterface.sol';
 
 /// @title Asset Contract.
 /// @author Melonport AG <team@melonport.com>
-contract Asset is AssetInterface, ERC20 {
+contract Asset is AssetInterface, DSTokenBase {
 
     // FIELDS
 
@@ -22,7 +22,9 @@ contract Asset is AssetInterface, ERC20 {
 
     // NON-CONSTANT METHODS
 
-    function Asset(string _name, string _symbol, uint _decimals) {
+    function Asset(string _name, string _symbol, uint _decimals)
+        DSTokenBase(0)
+    {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;

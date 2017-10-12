@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-import '../dependencies/ERC20.sol';
+import 'ds-token/base.sol';
 import '../libraries/safeMath.sol';
 import '../assets/AssetRegistrar.sol';
 import './DataFeedInterface.sol';

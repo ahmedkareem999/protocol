@@ -18,7 +18,7 @@ contract Staked is Fund {
 
     InternalAccounting internalAccounting; // Accounts for assets not held in custody of fund
 
-    function balancesOfHolderAtLeast(address ofHolder, uint x) internal returns (bool) { return balances[ofHolder] >= x; }
+    function balancesOfHolderAtLeast(address ofHolder, uint x) internal returns (bool) { return _balances[ofHolder] >= x; }
 
     function increaseStake(uint shareQuantity)
         external
@@ -26,9 +26,9 @@ contract Staked is Fund {
         pre_cond(notShutDown())
         pre_cond(isPastZero(shareQuantity))
         pre_cond(balancesOfHolderAtLeast(msg.sender, shareQuantity))
-        post_cond(prevTotalSupply == totalSupply)
+        post_cond(prevTotalSupply == _supply)
     {
-        uint prevTotalSupply = totalSupply;
+        uint prevTotalSupply = _supply;
         subShares(msg.sender, shareQuantity);
         addShares(this, shareQuantity);
     }
@@ -39,9 +39,9 @@ contract Staked is Fund {
         pre_cond(notShutDown())
         pre_cond(isPastZero(shareQuantity))
         pre_cond(balancesOfHolderAtLeast(this, shareQuantity))
-        post_cond(prevTotalSupply == totalSupply)
+        post_cond(prevTotalSupply == _supply)
     {
-        uint prevTotalSupply = totalSupply;
+        uint prevTotalSupply = _supply;
         subShares(this, shareQuantity);
         addShares(msg.sender, shareQuantity);
     }

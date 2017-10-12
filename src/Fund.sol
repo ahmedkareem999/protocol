@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-import {ERC20 as Shares} from './dependencies/ERC20.sol';
+import {DSTokenBase as Shares} from 'ds-token/base.sol';
 import './dependencies/DBC.sol';
 import './dependencies/Owned.sol';
 import './sphere/SphereInterface.sol';
@@ -106,7 +106,7 @@ contract Fund is DBC, Owned, Shares, FundInterface {
         success = ERC20(ofAsset).approve(EXCHANGE, quantity);
         SpendingApproved(EXCHANGE, ofAsset, quantity);
     }
-    function balancesOfHolderLessThan(address ofHolder, uint x) internal returns (bool) { return balances[ofHolder] < x; }
+    function balancesOfHolderLessThan(address ofHolder, uint x) internal returns (bool) { return _balances[ofHolder] < x; }
     function isVersion() internal returns (bool) { return msg.sender == VERSION; }
 
     // CONSTANT METHODS
@@ -170,13 +170,13 @@ contract Fund is DBC, Owned, Shares, FundInterface {
             DIVISOR_FEE
         );
         performanceReward = 0;
-        if (totalSupply != 0) {
+        if (_supply != 0) {
             uint currSharePrice = calcValuePerShare(gav); // TODO Multiply w getInvertedPrice(ofReferenceAsset)
             if (currSharePrice > atLastConversion.sharePrice) {
               performanceReward = rewards.performanceReward(
                   PERFORMANCE_REWARD_RATE,
                   int(currSharePrice - atLastConversion.sharePrice),
-                  totalSupply,
+                  _supply,
                   DIVISOR_FEE
               );
             }
@@ -199,10 +199,10 @@ contract Fund is DBC, Owned, Shares, FundInterface {
     /// @return Share price denominated in [base unit of melonAsset * base unit of share / base unit of share] == [base unit of melonAsset]
     function calcValuePerShare(uint value)
         constant
-        pre_cond(isPastZero(totalSupply))
+        pre_cond(isPastZero(_supply))
         returns (uint valuePerShare)
     {
-        valuePerShare = value.mul(MELON_IN_BASE_UNITS).div(totalSupply);
+        valuePerShare = value.mul(MELON_IN_BASE_UNITS).div(_supply);
     }
 
     /// @notice Calculates essential fund metrics
@@ -216,7 +216,7 @@ contract Fund is DBC, Owned, Shares, FundInterface {
         uint gav = calcGav(); // Reflects value indepentent of fees
         var (managementReward, performanceReward, unclaimedRewards) = calcUnclaimedRewards(gav);
         uint nav = calcNav(gav, unclaimedRewards);
-        uint sharePrice = isPastZero(totalSupply) ? calcValuePerShare(nav) : MELON_IN_BASE_UNITS; // Handle potential division through zero by defining a default value
+        uint sharePrice = isPastZero(_supply) ? calcValuePerShare(nav) : MELON_IN_BASE_UNITS; // Handle potential division through zero by defining a default value
         return (gav, managementReward, performanceReward, unclaimedRewards, nav, sharePrice);
     }
 
@@ -250,7 +250,9 @@ contract Fund is DBC, Owned, Shares, FundInterface {
         address ofParticipation,
         address ofRiskMgmt,
         address ofSphere
-    ) {
+    )
+        DSTokenBase(0)
+    {
         SphereInterface sphere = SphereInterface(ofSphere);
         module.datafeed = DataFeedInterface(sphere.getDataFeed());
         // For later release initiate exchangeAdapter here: eg as exchangeAdapter = ExchangeInterface(sphere.getExchangeAdapter());
@@ -276,7 +278,7 @@ contract Fund is DBC, Owned, Shares, FundInterface {
             unclaimedRewards: 0,
             nav: 0,
             sharePrice: MELON_IN_BASE_UNITS,
-            totalSupply: totalSupply,
+            totalSupply: _supply,
             timestamp: now
         });
         CREATED = now;
@@ -382,14 +384,14 @@ contract Fund is DBC, Owned, Shares, FundInterface {
         }
 
         if (
-            isPastZero(totalSupply) &&
+            isPastZero(_supply) &&
             now < request.timestamp.add(module.datafeed.getInterval())
         ) {
             return logError("ERR: DataFeed Module: Wait at least one interval before continuing");
         }
 
         if (
-            isPastZero(totalSupply) &&
+            isPastZero(_supply) &&
             module.datafeed.getLastUpdateId() < request.lastDataFeedUpdateId.add(2)
         ) {
             return logError("ERR: DataFeed Module: Wait at least for two updates before continuing");
@@ -459,7 +461,7 @@ contract Fund is DBC, Owned, Shares, FundInterface {
 
         // Quantity of shares which belong to the investors
         var (gav, , , , nav, ) = performCalculations();
-        uint participantsTotalSupplyBeforeRedeem = totalSupply.mul(nav).div(gav);
+        uint participantsTotalSupplyBeforeRedeem = _supply.mul(nav).div(gav);
 
 
         if (isZero(participantsTotalSupplyBeforeRedeem)) {
@@ -656,8 +658,8 @@ contract Fund is DBC, Owned, Shares, FundInterface {
         }
 
         // Convert unclaimed rewards in form of ownerless shares into shares which belong to manager
-        uint shareQuantity = totalSupply.mul(unclaimedRewards).div(gav);
-        totalSupply = totalSupply.sub(shareQuantity); // Annihilate ownerless shares
+        uint shareQuantity = _supply.mul(unclaimedRewards).div(gav);
+        _supply = _supply.sub(shareQuantity); // Annihilate ownerless shares
         addShares(owner, shareQuantity); // Create shares and allocate them to manager
         // Update Calculations
         atLastConversion = Calculations({
@@ -667,31 +669,31 @@ contract Fund is DBC, Owned, Shares, FundInterface {
             unclaimedRewards: unclaimedRewards,
             nav: nav,
             sharePrice: sharePrice,
-            totalSupply: totalSupply,
+            totalSupply: _supply,
             timestamp: now
         });
 
         RewardsConverted(now, shareQuantity, unclaimedRewards);
-        CalculationUpdate(now, managementReward, performanceReward, nav, sharePrice, totalSupply);
+        CalculationUpdate(now, managementReward, performanceReward, nav, sharePrice, _supply);
     }
 
     // INTERNAL METHODS
 
     function createShares(address recipient, uint shareQuantity) internal {
-        totalSupply = totalSupply.add(shareQuantity);
+        _supply = _supply.add(shareQuantity);
         addShares(recipient, shareQuantity);
         Subscribed(msg.sender, now, shareQuantity);
     }
 
     function annihilateShares(address recipient, uint shareQuantity) internal {
-        totalSupply = totalSupply.sub(shareQuantity);
+        _supply = _supply.sub(shareQuantity);
         subShares(recipient, shareQuantity);
         Redeemed(msg.sender, now, shareQuantity);
     }
 
-    function addShares(address recipient, uint shareQuantity) internal { balances[recipient] = balances[recipient].add(shareQuantity); }
+    function addShares(address recipient, uint shareQuantity) internal { _balances[recipient] = _balances[recipient].add(shareQuantity); }
 
-    function subShares(address recipient, uint shareQuantity) internal { balances[recipient] = balances[recipient].sub(shareQuantity); }
+    function subShares(address recipient, uint shareQuantity) internal { _balances[recipient] = _balances[recipient].sub(shareQuantity); }
 
     function logError(string message) internal returns (bool, string) {
         ErrorMessage(message);

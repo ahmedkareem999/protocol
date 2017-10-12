@@ -1,6 +1,5 @@
 pragma solidity ^0.4.11;
 
-import '../dependencies/ERC20.sol';
 import './RiskMgmtInterface.sol';
 
 /// @title RiskMgmt Contract

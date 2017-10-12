@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-import '../../dependencies/ERC20.sol';
+import 'erc20/erc20.sol';
 
 
 /// @title SimpleAdapter Contract

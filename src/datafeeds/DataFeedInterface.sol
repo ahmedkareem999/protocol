@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-import '../dependencies/ERC20.sol';
+import 'ds-token/base.sol';
 import '../assets/AssetRegistrarInterface.sol';
 
 /// @title DataFeed Interface Contract

@@ -7,14 +7,13 @@ import "./EtherToken.sol";
 contract AssetTest is DSTest {
 
     EtherToken etherToken;
-    uint preminedAmount = 10 ** 28;
 
     function setUp() {
         etherToken = new EtherToken();
     }
 
-    function testPreminedAmountCorrect() {
-        assertEq(etherToken.balanceOf(this), preminedAmount);
+    function testAmountCorrect() {
+        assertEq(etherToken.balanceOf(this), 0);
     }
 
     function testDeposit() {
@@ -39,9 +38,9 @@ contract AssetTest is DSTest {
         uint depositAmount = 1 ether;
         uint withdrawAmount = 500 finney;
         etherToken.deposit.value(depositAmount)();
-        assertEq(etherToken.balance, depositAmount);
-        uint preTokenBalance = etherToken.balanceOf(this);
-        uint preEthBalance = this.balance;
+        //assertEq(etherToken.balance, depositAmount);
+        //uint preTokenBalance = etherToken.balanceOf(this);
+        //uint preEthBalance = this.balance;
 //        etherToken.withdraw(withdrawAmount);
 //        uint postTokenBalance = etherToken.balanceOf(this);
 //        uint postEthBalance = this.balance;
