@@ -7,3 +7,6 @@
 [submodule "lib/ds-weth"]
 	path = lib/ds-weth
 	url = https://github.com/dapphub/ds-weth
+[submodule "lib/ds-exec"]
+	path = lib/ds-exec
+	url = https://github.com/dapphub/ds-exec
