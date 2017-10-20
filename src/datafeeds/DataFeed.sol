@@ -167,12 +167,31 @@ contract DataFeed is DataFeedInterface, AssetRegistrar {
     /// @return Price Feed contract w Backup Owner
     function DataFeed(
         address ofQuoteAsset, // Inital entry in asset registrar contract is Melon (QUOTE_ASSET)
+        string quoteAssetName,
+        string quoteAssetSymbol,
+        uint quoteAssetDecimals,
+        string quoteAssetUrl,
+        bytes32 quoteAssetIpfsHash,
+        bytes32 quoteAssetChainId,
+        address quoteAssetBreakIn,
+        address quoteAssetBreakOut,
         uint interval,
         uint validity
     ) {
         QUOTE_ASSET = ofQuoteAsset;
         INTERVAL = interval;
         VALIDITY = validity;
+        register(
+            QUOTE_ASSET,
+            quoteAssetName,
+            quoteAssetSymbol,
+            quoteAssetDecimals,
+            quoteAssetUrl,
+            quoteAssetIpfsHash,
+            quoteAssetChainId,
+            quoteAssetBreakIn,
+            quoteAssetBreakOut
+        );
     }
 
     /// @dev Only Owner; Same sized input arrays
