@@ -151,14 +151,14 @@ contract DataFeed is DataFeedInterface, AssetRegistrar {
     /// @param buyQuantity Quantity in base units being bought of buyAsset
     /// @return orderPrice Price as determined by an order
     function getOrderPrice(
-        address ofBase,
+        address sellAsset,
         uint sellQuantity,
         uint buyQuantity
     )
         constant returns (uint orderPrice)
     {
         return buyQuantity
-            .mul(10 ** uint(getDecimals(ofBase)))
+            .mul(10 ** uint(getDecimals(sellAsset)))
             .div(sellQuantity);
     }
 
