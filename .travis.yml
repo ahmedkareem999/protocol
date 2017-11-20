@@ -23,6 +23,7 @@ install:
 - npm install
 before_script:
 - parity --chain test/parity-genesis.config --jsonrpc-apis all &
+- sleep 20
 - npm run before-tests
 - sleep 20
 - killall parity
