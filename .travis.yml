@@ -26,6 +26,7 @@ script:
 - npm run devchain:parity > parity.log &
 - sleep 20
 - npm run deploy:development
+- ./tempscript.sh
 - npm run test
 - npm run oyente
 after_script:
