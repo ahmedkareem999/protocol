@@ -9,7 +9,8 @@ tar -xvf ethrun-v0.2.4-linux.tar.gz
 sudo cp ethrun /usr/local/bin/
 nix-channel --add https://nix.dapphub.com/pkgs/dapphub
 nix-channel --update
-nix-env -iA dapphub.{dapp,hevm,seth,solc}
+nix-env -iA dapphub.master.dapp
+#nix-env -iA dapphub.{dapp,hevm,seth,solc}
 
 # install oyente
 sudo apt-get install software-properties-common
